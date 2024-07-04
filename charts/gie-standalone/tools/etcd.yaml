@@ -32,7 +32,31 @@ spec:
     - containerPort: 2380
       name: server
       protocol: TCP
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "250m"
+      limits:
+        memory: "256Mi"
+        cpu: "500m"
+    securityContext:
+      runAsUser: 1000
+      runAsNonRoot: true
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: 2379
+      initialDelaySeconds: 10
+      periodSeconds: 5
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: 2379
+      initialDelaySeconds: 15
+      periodSeconds: 20
   restartPolicy: Always
+  securityContext:
+    fsGroup: 1000
 
 
 ---
@@ -40,6 +64,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: etcd-for-vineyard
+  labels:
+    app: etcd
 spec:
   ports:
   - name: etcd-for-vineyard-port
